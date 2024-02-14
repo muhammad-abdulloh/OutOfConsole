@@ -1,0 +1,6 @@
+@OutOfConsole_HostAddress = http://localhost:5062
+
+GET {{OutOfConsole_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
