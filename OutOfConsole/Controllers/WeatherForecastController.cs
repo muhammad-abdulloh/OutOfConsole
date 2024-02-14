@@ -1,3 +1,4 @@
+using Dapper;
 using Microsoft.AspNetCore.Mvc;
 using Npgsql;
 using OutOfConsole.Models;
@@ -18,30 +19,19 @@ namespace OutOfConsole.Controllers
         {
             using (NpgsqlConnection connection = new NpgsqlConnection(CONNECTIONSTRING))
             {
-                string query = $"select * from experiment;";
-                connection.Open();
-                NpgsqlCommand command = new NpgsqlCommand(query, connection);
-
-                var x = command.ExecuteReader();
-
-                List<Experiment> list = new List<Experiment>();
-
-
-                while (x.Read())
-                {
-                    list.Add(new Experiment()
-                    {
-                        Id =  (int)x[0],
-                        Name = (string)x[1],
-                        Age = (int)x[2]
-                    });
-
-                }
-
-                return list;
-
+                return connection.Query<Experiment>("select * from experiment;").ToList();
             }
         }
+
+        [HttpGet]
+        public List<Experiment> GetByAge(int age)
+        {
+            using (NpgsqlConnection connection = new NpgsqlConnection(CONNECTIONSTRING))
+            {
+                return connection.Query<Experiment>("select * from experiment where age > @age;", new { Age = age }).ToList();
+            }
+        }
+
 
         [HttpGet]
         [Route("apiget/test/get/qaytar")]
