@@ -24,13 +24,78 @@ namespace OutOfConsole.Controllers
         }
 
         [HttpGet]
-        public List<Experiment> GetByAge(int age)
+        public List<Experiment> GetByAge(int age, string name)
         {
             using (NpgsqlConnection connection = new NpgsqlConnection(CONNECTIONSTRING))
             {
-                return connection.Query<Experiment>("select * from experiment where age > @age;", new { Age = age }).ToList();
+                return connection.Query<Experiment>("select * from experiment where age > @age and name = @name;", new { Age = age, Name =  name}).ToList();
             }
         }
+
+        [HttpPost]
+        public ExperimentDTO CreateDataWithDapper(ExperimentDTO viewModel)
+        {
+            string sql = "INSERT INTO experiment (name, age) VALUES (@name, @age);";
+
+            using (NpgsqlConnection connection = new NpgsqlConnection(CONNECTIONSTRING))
+            {
+                connection.Execute(sql, new ExperimentDTO
+                {
+                    Name = viewModel.Name,
+                    Age = viewModel.Age,
+                });
+
+                return viewModel;
+            }
+        }
+
+
+        [HttpPut]
+        public ExperimentDTO UpdateDataWithDapper(int id, ExperimentDTO viewModel)
+        {
+            string sql = $"update experiment set name = @name, age = @age where id = {id}";
+
+            using (NpgsqlConnection connection = new NpgsqlConnection(CONNECTIONSTRING))
+            {
+                connection.Execute(sql, new ExperimentDTO
+                {
+                    Name = viewModel.Name,
+                    Age = viewModel.Age,
+
+                });
+
+                return viewModel;
+            }
+        }
+
+
+        [HttpPatch]
+        public int UpdateDataPatchWithDapper(int id, string name)
+        {
+            string sql = $"update experiment set name = @name where id = @id";
+
+            using (NpgsqlConnection connection = new NpgsqlConnection(CONNECTIONSTRING))
+            {
+                var x = connection.Execute(sql, new { Name = name, Id = id });
+
+                return x;
+            }
+        }
+
+
+        [HttpDelete]
+        public int DeleteDataWithDapper(int id)
+        {
+            string sql = $"Delete from experiment where id = @id";
+
+            using (NpgsqlConnection connection = new NpgsqlConnection(CONNECTIONSTRING))
+            {
+                var x = connection.Execute(sql, new { Id = id });
+
+                return x;
+            }
+        }
+
 
 
         [HttpGet]
